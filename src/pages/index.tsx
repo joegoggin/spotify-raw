@@ -2,6 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { useToken } from "../context/TokenContext";
 
 import { api } from "../utils/api";
 
@@ -16,8 +17,13 @@ const Home: NextPage = () => {
 	 ** ** backend []
 	 */
 
+	// state
 	const [code, setCode] = useState<string | null>(null);
 
+	// context
+	const { accessToken, refreshToken, setTokenData } = useToken();
+
+	// queries
 	const { data: uriData } = api.auth.getCode.useQuery();
 	const { data: tokenData } = api.auth.getToken.useQuery(code);
 
@@ -30,25 +36,21 @@ const Home: NextPage = () => {
 	};
 
 	useEffect(() => {
+		if (accessToken && refreshToken) void router.push("/dashboard");
+
 		const queryString = window.location.search;
 		const urlParams = new URLSearchParams(queryString);
 
-		const accessToken = localStorage.getItem("accessToken");
-		const refreshToken = localStorage.getItem("refreshToken");
-
-		if (accessToken && refreshToken) void router.push("/dashboard");
-
 		if (urlParams.has("code")) setCode(urlParams.get("code"));
-	}, [router]);
+	}, [router, accessToken, refreshToken]);
 
 	useEffect(() => {
 		if (tokenData) {
-			localStorage.setItem("accessToken", tokenData.accessToken);
-			localStorage.setItem("refreshToken", tokenData.refreshToken);
+			setTokenData(tokenData);
 
 			void router.push("/dashboard");
 		}
-	}, [tokenData, router]);
+	}, [tokenData, router, setTokenData]);
 
 	return (
 		<>
