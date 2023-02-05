@@ -1,20 +1,54 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-	const { data } = api.auth.login.useQuery();
+	/*
+	 ** TODO **
+	 ** fix get token route [x]
+	 ** store token in local storage [x]
+	 ** redirect to dashboard [x]
+	 ** create private routes []
+	 ** ** frontend []
+	 ** ** backend []
+	 */
+
+	const [code, setCode] = useState<string | null>(null);
+
+	const { data: uriData } = api.auth.getCode.useQuery();
+	const { data: tokenData } = api.auth.getToken.useQuery(code);
 
 	const router = useRouter();
 
 	const handleClick = () => {
-		if (data) {
-			void router.push(data.uri);
+		if (uriData) {
+			void router.push(uriData.uri);
 		}
 	};
+
+	useEffect(() => {
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+
+		const accessToken = localStorage.getItem("accessToken");
+		const refreshToken = localStorage.getItem("refreshToken");
+
+		if (accessToken && refreshToken) void router.push("/dashboard");
+
+		if (urlParams.has("code")) setCode(urlParams.get("code"));
+	}, [router]);
+
+	useEffect(() => {
+		if (tokenData) {
+			localStorage.setItem("accessToken", tokenData.accessToken);
+			localStorage.setItem("refreshToken", tokenData.refreshToken);
+
+			void router.push("/dashboard");
+		}
+	}, [tokenData, router]);
 
 	return (
 		<>
