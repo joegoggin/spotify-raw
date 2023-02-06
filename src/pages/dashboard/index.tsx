@@ -1,10 +1,13 @@
 import React from "react";
+import PrivatePage from "../../components/auth/PrivatePage";
 
 const DashboardPage: React.FC = () => {
 	return (
-		<div>
-			<h1>Dashboard</h1>
-		</div>
+		<PrivatePage>
+			<div>
+				<h1>Dashboard</h1>
+			</div>
+		</PrivatePage>
 	);
 };
 

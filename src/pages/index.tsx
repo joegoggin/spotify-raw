@@ -13,7 +13,7 @@ const Home: NextPage = () => {
 	 ** store token in local storage [x]
 	 ** redirect to dashboard [x]
 	 ** create private routes []
-	 ** ** frontend []
+	 ** ** frontend [x]
 	 ** ** backend []
 	 */
 
