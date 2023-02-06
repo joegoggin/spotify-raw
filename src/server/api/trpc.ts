@@ -23,27 +23,17 @@ import { prisma } from "../db";
 type CreateContextOptions = Record<string, never>;
 
 /**
- * This helper generates the "internals" for a tRPC context. If you need to use
- * it, you can export it from here
- *
- * Examples of things you may need it for:
- * - testing, so we dont have to mock Next.js' req/res
- * - trpc's `createSSGHelpers` where we don't have req/res
- * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
- */
-const createInnerTRPCContext = (_opts: CreateContextOptions) => {
-  return {
-    prisma,
-  };
-};
-
-/**
  * This is the actual context you'll use in your router. It will be used to
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
 export const createTRPCContext = (_opts: CreateNextContextOptions) => {
-  return createInnerTRPCContext({});
+	const { req, res } = _opts;
+
+	return {
+		req,
+		res,
+	};
 };
 
 /**
@@ -52,14 +42,14 @@ export const createTRPCContext = (_opts: CreateNextContextOptions) => {
  * This is where the trpc api is initialized, connecting the context and
  * transformer
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape }) {
-    return shape;
-  },
+	transformer: superjson,
+	errorFormatter({ shape }) {
+		return shape;
+	},
 });
 
 /**
@@ -75,6 +65,24 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  */
 export const createTRPCRouter = t.router;
 
+const isAuthed = t.middleware(({ ctx, next }) => {
+	const { req } = ctx;
+
+	const token = req.headers.authorization?.split(" ")[1];
+
+	if (!token)
+		throw new TRPCError({
+			code: "UNAUTHORIZED",
+			message: "Access token is invalid.",
+		});
+
+	return next({
+		ctx: {
+			token,
+		},
+	});
+});
+
 /**
  * Public (unauthed) procedure
  *
@@ -83,3 +91,5 @@ export const createTRPCRouter = t.router;
  * can still access user session data if they are logged in
  */
 export const publicProcedure = t.procedure;
+
+export const privateProcedure = t.procedure.use(isAuthed);

@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
 import { useToken } from "../../context/TokenContext";
+import { setToken } from "../../utils/api";
 
 interface PrivateRouteProps {
 	children: React.ReactNode;
@@ -14,7 +15,9 @@ const PrivatePage: React.FC<PrivateRouteProps> = ({ children }) => {
 	const router = useRouter();
 
 	useEffect(() => {
-		if (!accessToken || !refreshToken) {
+		if (accessToken && refreshToken) {
+			setToken(accessToken);
+		} else {
 			void router.push("/");
 		}
 	}, [accessToken, refreshToken, router]);

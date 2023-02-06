@@ -2,21 +2,12 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { set } from "zod";
 import { useToken } from "../context/TokenContext";
 
-import { api } from "../utils/api";
+import { api, setToken } from "../utils/api";
 
 const Home: NextPage = () => {
-	/*
-	 ** TODO **
-	 ** fix get token route [x]
-	 ** store token in local storage [x]
-	 ** redirect to dashboard [x]
-	 ** create private routes []
-	 ** ** frontend [x]
-	 ** ** backend []
-	 */
-
 	// state
 	const [code, setCode] = useState<string | null>(null);
 
@@ -25,7 +16,13 @@ const Home: NextPage = () => {
 
 	// queries
 	const { data: uriData } = api.auth.getCode.useQuery();
-	const { data: tokenData } = api.auth.getToken.useQuery(code);
+	const { data: tokenData } = api.auth.getToken.useQuery(code, {
+		onSuccess: (data) => {
+			if (data) {
+				setToken(data.accessToken);
+			}
+		},
+	});
 
 	const router = useRouter();
 

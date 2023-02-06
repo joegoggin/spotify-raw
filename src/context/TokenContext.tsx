@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { setToken } from "../utils/api";
 
 interface TokenContext {
 	accessToken: string | null;
@@ -39,6 +40,8 @@ const TokenContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
 		setAccessToken(tokenData.accessToken);
 		setRefreshToken(tokenData.refreshToken);
+
+		setToken(tokenData.accessToken);
 	};
 
 	return (
