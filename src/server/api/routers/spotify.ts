@@ -1,13 +1,13 @@
 import { createTRPCRouter, privateProcedure } from "../trpc";
 
 export const spotifyRouter = createTRPCRouter({
-	getHistory: privateProcedure.query(({ ctx }) => {
-		const { token } = ctx;
+	getCurrentSong: privateProcedure.query(async ({ ctx }) => {
+		try {
+			const currentSong = await ctx.spotifyAPI.getMyCurrentPlayingTrack();
 
-		const auth = token;
-
-		return {
-			auth,
-		};
+			return currentSong.body.item;
+		} catch (error) {
+			throw error;
+		}
 	}),
 });

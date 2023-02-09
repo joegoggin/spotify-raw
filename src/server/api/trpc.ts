@@ -44,6 +44,7 @@ export const createTRPCContext = (_opts: CreateNextContextOptions) => {
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { getSpotifyAPI } from "../../utils/spotifyAPI";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
 	transformer: superjson,
@@ -76,9 +77,12 @@ const isAuthed = t.middleware(({ ctx, next }) => {
 			message: "Access token is invalid.",
 		});
 
+	const spotifyAPI = getSpotifyAPI(token);
+
 	return next({
 		ctx: {
 			token,
+			spotifyAPI,
 		},
 	});
 });

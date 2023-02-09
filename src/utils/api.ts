@@ -21,7 +21,6 @@ const getBaseUrl = () => {
 let token: string;
 
 export const setToken = (accessToken: string) => {
-	console.log("this ran! heres the access token: ", accessToken);
 	token = `Bearer ${accessToken}`;
 };
 
